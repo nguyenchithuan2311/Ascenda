@@ -21,7 +21,8 @@ public static class HttpHelper
     
     public static async Task<List<Dictionary<string, object>>> PrepareDataAsync()
     {
-        List<string> urls=["https://5f2be0b4ffc88500167b85a0.mockapi.io/suppliers/acme",
+        List<string> urls=[
+            "https://5f2be0b4ffc88500167b85a0.mockapi.io/suppliers/acme",
             "https://5f2be0b4ffc88500167b85a0.mockapi.io/suppliers/patagonia",
             "https://5f2be0b4ffc88500167b85a0.mockapi.io/suppliers/paperflies"];
         var results = await FetchDataFromUrlsAsync(urls);

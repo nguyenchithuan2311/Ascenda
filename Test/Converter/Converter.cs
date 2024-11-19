@@ -21,7 +21,7 @@ public class Converter
 
                 var children = targetObject?.GetType().GetProperty(matchingKey) ??
                                targetObject?.GetType()
-                                   .GetProperty($"{char.ToUpper(inputKey[0])}{inputKey.Substring(1)}");
+                                   .GetProperty($"{char.ToUpper(inputKey[0])}{inputKey[1..]}");
 
                 if (children != null && children.PropertyType.IsGenericType &&
                     children.PropertyType.GetGenericTypeDefinition() == typeof(List<>))

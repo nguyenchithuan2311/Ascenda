@@ -10,6 +10,8 @@ public class Images
 
 public class TargetImageItem
 {
+    [Extension.Extension.JsonField("url")]
     public string Link { get; private set; }
+    [Extension.Extension.JsonField("caption")]
     public string Description { get; private set; }
 }

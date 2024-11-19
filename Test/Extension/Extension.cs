@@ -11,4 +11,10 @@ public static class Extension
 
         return TypeDescriptor.GetConverter(targetType).ConvertFromString(input);
     }
+    
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
+    public class JsonFieldAttribute(string fieldName) : Attribute
+    {
+        public string FieldName { get; } = fieldName;
+    }
 }
