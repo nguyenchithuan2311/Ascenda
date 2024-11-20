@@ -17,15 +17,17 @@ public static class HttpHelper
 
         return results.ToList();
     }
-    
+
     public static async Task<List<Dictionary<string, object>>> PrepareDataAsync()
     {
-        List<string> urls=[
+        List<string> urls =
+        [
             "https://5f2be0b4ffc88500167b85a0.mockapi.io/suppliers/acme",
             "https://5f2be0b4ffc88500167b85a0.mockapi.io/suppliers/patagonia",
-            "https://5f2be0b4ffc88500167b85a0.mockapi.io/suppliers/paperflies"];
+            "https://5f2be0b4ffc88500167b85a0.mockapi.io/suppliers/paperflies"
+        ];
         var results = await FetchDataFromUrlsAsync(urls);
-        
+
         List<Dictionary<string, object>> hotels = [];
         foreach (var result in results)
             hotels.AddRange(JsonSerializer.Deserialize<List<Dictionary<string, object>>>(result));

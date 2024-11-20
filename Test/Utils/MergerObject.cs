@@ -87,7 +87,8 @@ public abstract class MergerObject
 
         if (type.IsValueType)
         {
-            if (type == typeof(int) || type == typeof(long) || type == typeof(float) || type == typeof(double) || type == typeof(decimal))
+            if (type == typeof(int) || type == typeof(long) || type == typeof(float) || type == typeof(double) ||
+                type == typeof(decimal))
                 return Convert.ToDecimal(value) == 0;
 
             if (type == typeof(bool))
