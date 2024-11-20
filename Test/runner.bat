@@ -1,6 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
+dotnet publish -c Release -r win-x64 --self-contained
 set firstElement=false
 set lastElement=false
 set count=0
