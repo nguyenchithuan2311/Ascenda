@@ -2,12 +2,12 @@ using System.Reflection;
 
 namespace Test.Utils;
 
-public class MergerObject
+public abstract class MergerObject
 {
     public static void MergeObjects<T>(T objA, T objB) where T : class, new()
     {
         if (objA == null || objB == null)
-            throw new ArgumentNullException("Objects cannot be null");
+            throw new ArgumentNullException(nameof(objA), "Objects cannot be null");
 
         var properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
@@ -19,24 +19,21 @@ public class MergerObject
             var valueB = property.GetValue(objB);
             var valueA = property.GetValue(objA);
 
-            if (IsDefaultValue(valueB) || valueB == null) continue;
+            if (IsDefaultValue(valueB)) continue;
 
             if (property.PropertyType.IsClass && property.PropertyType != typeof(string))
             {
-                if (IsDefaultValue(objA.GetType().GetProperty(property.Name).GetValue(objA)))
+                var valueAProperty = property.GetValue(objA);
+                if (IsDefaultValue(valueAProperty))
                 {
-                    var newValue = Activator.CreateInstance(property.PropertyType);
-                    newValue = property.GetValue(objB);
-                    property.SetValue(objA, newValue);
+                    property.SetValue(objA, valueB);
                 }
                 else
                 {
                     MergeObjects(valueA, valueB, property.PropertyType);
                 }
-
-                
             }
-            else if (IsDefaultValue(objA) || objA == null)
+            else
             {
                 property.SetValue(objA, valueB);
             }
@@ -55,11 +52,12 @@ public class MergerObject
             try
             {
                 var valueB = property.GetValue(objB);
-                var valueA = property.GetValue(objA);
                 if (valueB == null || IsDefaultValue(valueB)) continue;
+
+                var valueA = property.GetValue(objA);
                 if (property.PropertyType.IsClass && property.PropertyType != typeof(string))
                 {
-                    if (IsDefaultValue(objA.GetType().GetProperty(property.Name).GetValue(objA)))
+                    if (IsDefaultValue(valueA))
                     {
                         property.SetValue(objA, valueB);
                     }
@@ -68,7 +66,7 @@ public class MergerObject
                         MergeObjects(valueA, valueB, property.PropertyType);
                     }
                 }
-                else if (IsDefaultValue(objA) || objA == null)
+                else
                 {
                     property.SetValue(objA, valueB);
                 }
@@ -89,24 +87,17 @@ public class MergerObject
 
         if (type.IsValueType)
         {
-            if (type == typeof(int) || type == typeof(long) || type == typeof(float) || type == typeof(double) ||
-                type == typeof(decimal))
-            {
+            if (type == typeof(int) || type == typeof(long) || type == typeof(float) || type == typeof(double) || type == typeof(decimal))
                 return Convert.ToDecimal(value) == 0;
-            }
 
             if (type == typeof(bool))
-            {
                 return (bool)value == false;
-            }
 
             return value.Equals(Activator.CreateInstance(type));
         }
 
         if (type == typeof(string))
-        {
             return string.IsNullOrEmpty((string)value);
-        }
 
         if (typeof(System.Collections.IEnumerable).IsAssignableFrom(type))
         {
@@ -114,11 +105,12 @@ public class MergerObject
             return list == null || !list.GetEnumerator().MoveNext();
         }
 
-
-        if (!type.IsClass) return false;
+        if (!type.IsClass)
+            return false;
 
         var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-        return (from property in properties where property.CanRead && property.CanWrite select property.GetValue(value))
+        return properties.Where(property => property is { CanRead: true, CanWrite: true })
+            .Select(property => property.GetValue(value))
             .All(IsDefaultValue);
     }
 }

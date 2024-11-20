@@ -5,17 +5,16 @@ namespace Test.Utils;
 public static class HttpHelper
 {
     private static readonly HttpClient Client = new();
-    static async Task<List<string>> FetchDataFromUrlsAsync(IEnumerable<string> urls)
+
+    private static async Task<List<string>> FetchDataFromUrlsAsync(IEnumerable<string> urls)
     {
-        
-        var tasks = urls.Select(async url =>
+        var results = await Task.WhenAll(urls.Select(async url =>
         {
             var response = await Client.GetAsync(url);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadAsStringAsync();
-        });
-        
-        var results = await Task.WhenAll(tasks);
+        }));
+
         return results.ToList();
     }
     

@@ -2,7 +2,7 @@ using System.Collections;
 
 namespace Test.Utils;
 
-public class Validation
+public abstract class Validation
 {
     public static string? GetInputKey(Dictionary<string, object> input, string property, string matchingKey)
     {

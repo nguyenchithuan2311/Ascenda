@@ -6,7 +6,7 @@ using Test.Utils;
 
 namespace Test.Converter;
 
-public class Converter
+public abstract class Converter
     { 
         private static void HandleJsonArray(object targetObject, string matchingKey, string inputKey, string json, Type propertyType)
         {
@@ -19,33 +19,26 @@ public class Converter
                 var newList = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(json);
                 if (newList == null) return;
 
-                var children = targetObject?.GetType().GetProperty(matchingKey) ??
-                               targetObject?.GetType()
-                                   .GetProperty($"{char.ToUpper(inputKey[0])}{inputKey[1..]}");
+                var children = targetObject.GetType().GetProperty(matchingKey) ?? 
+                                          targetObject.GetType().GetProperty($"{char.ToUpper(inputKey[0])}{inputKey[1..]}");
 
-                if (children != null && children.PropertyType.IsGenericType &&
-                    children.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
-                {
-                    var listInstance = Activator.CreateInstance(children.PropertyType) as IList;
-                    ConvertObject(newList, listInstance);
-                    children.SetValue(targetObject, listInstance);
-                }
-                else
-                {
-                    var listInstance =
-                        Activator.CreateInstance(typeof(List<>).MakeGenericType(children.PropertyType)) as IList;
-                    ConvertObject(newList, listInstance);
-                    children.SetValue(targetObject, listInstance[0]);
-                }
+                if (children == null) return;
+                var isGenericList = children.PropertyType.IsGenericType &&
+                                    children.PropertyType.GetGenericTypeDefinition() == typeof(List<>);
+                var listType = isGenericList
+                    ? children.PropertyType
+                    : typeof(List<>).MakeGenericType(children.PropertyType);
+                if (Activator.CreateInstance(listType) is not IList listInstance) return;
+                ConvertObject(newList, listInstance);
+                children.SetValue(targetObject, isGenericList ? listInstance : listInstance[0]);
             }
             else
             {
                 try
                 {
-                    var simpleList = JsonSerializer.Deserialize(json,
-                        typeof(List<>).MakeGenericType(propertyType.GetGenericArguments()[0]));
-                    var children = targetObject?.GetType().GetProperty(matchingKey);
-                    children?.SetValue(targetObject, simpleList);
+                    var elementType = propertyType.GetGenericArguments()[0];
+                    var simpleList = JsonSerializer.Deserialize(json, typeof(List<>).MakeGenericType(elementType));
+                    targetObject.GetType().GetProperty(matchingKey)?.SetValue(targetObject, simpleList);
                 }
                 catch
                 {
@@ -58,24 +51,25 @@ public class Converter
             var newDic = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
             if (newDic == null) return;
             
-            var children = targetObject?.GetType().GetProperty(matchingKey) ??
-                           targetObject?.GetType().GetProperty(inputKey);
-            
+            var children = targetObject.GetType().GetProperty(matchingKey) ??
+                                      targetObject.GetType().GetProperty(inputKey);
+            if (children == null) return;
             var listType = typeof(List<>).MakeGenericType(children.PropertyType);
-            var listInstance = Activator.CreateInstance(listType) as IList;
+            if (Activator.CreateInstance(listType) is not IList listInstance) return;
+            
             ConvertObject([newDic], listInstance);
             children.SetValue(targetObject, listInstance[0]);
         }
         private static void HandleComplexType(object targetObject, string matchingKey, string inputKey, object value, Type propertyType)
         {
             var temp = value.ToString();
-            if (temp.TrimStart().StartsWith("["))
+            if (temp != null && temp.TrimStart().StartsWith("["))
             {
                 HandleJsonArray(targetObject, matchingKey, inputKey, temp, propertyType);
             }
             else
             {
-                HandleJsonObject(targetObject, matchingKey, inputKey, temp);
+                if (temp != null) HandleJsonObject(targetObject, matchingKey, inputKey, temp);
             }
         }
         
@@ -85,6 +79,8 @@ public class Converter
             if (convertedValue == null) return;
             
             var containsKey = Utils.Utils.AllTargetType.FirstOrDefault(s => s.Key.Contains(matchingKey));
+            if (containsKey.Value == null) return;
+            
             var keyName = containsKey.Value.Name;
             var targetType = containsKey.Value.GetProperty(matchingKey);
             var objectTypeParent = Utils.Utils.AllTargetType.FirstOrDefault(s => s.Key.Contains(keyName)).Value?.GetProperty(keyName);
@@ -96,7 +92,7 @@ public class Converter
             }
             catch (Exception)
             {
-                var oldObject = targetObject.GetType().GetProperty(keyName).GetValue(targetObject);
+                var oldObject = targetObject.GetType().GetProperty(keyName)?.GetValue(targetObject);
                 targetType.SetValue(oldObject, convertedValue);
                 var targetProperty = objectTypeParent.PropertyType == targetObject.GetType() ? matchingKey : keyName;
                 targetObject.GetType().GetProperty(targetProperty).SetValue(targetObject, oldObject);
@@ -114,6 +110,7 @@ public class Converter
                 {
                     var matchingKey = Utils.Utils.FindKeyContainingSubstring(property);
                     if (matchingKey == null) continue;
+                    
                     var inputKey = Validation.GetInputKey(input, property, matchingKey);
                     if (inputKey == null) continue;
                     

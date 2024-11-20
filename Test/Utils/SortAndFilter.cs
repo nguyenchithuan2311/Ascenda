@@ -2,7 +2,7 @@ using Test.Entity;
 
 namespace Test.Utils;
 
-public class SortAndFilter
+public abstract class SortAndFilter
 {
     public static List<OriginalHotel> FilterHotelsByHotelIdsAndDestinationIds(List<string> hotelIds, List<string> destinationIds, List<OriginalHotel> results)
     {

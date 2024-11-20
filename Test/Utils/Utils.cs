@@ -3,10 +3,10 @@ using Test.Entity;
 
 namespace Test.Utils;
 
-public class Utils
+public abstract class Utils
 {
-    public static readonly List<PropertyInfo> AllProperties = GetAllProperties(typeof(OriginalHotel));
-    public static readonly List<Dictionary<string, string>> AllCustomAttributes = GetAllCustomAttributes(typeof(OriginalHotel));
+    private static readonly List<PropertyInfo> AllProperties = GetAllProperties(typeof(OriginalHotel));
+    private static readonly List<Dictionary<string, string>> AllCustomAttributes = GetAllCustomAttributes(typeof(OriginalHotel));
     public static readonly Dictionary<string, Type> AllTargetType = GetAllPropertiesWithParent(typeof(OriginalHotel));
 
     private static List<PropertyInfo> GetAllProperties(Type type)
@@ -16,10 +16,8 @@ public class Utils
         foreach (var prop in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
         {
             properties.Add(prop);
-            if (!prop.PropertyType.IsClass || prop.PropertyType == typeof(string)) continue;
-            var nestedProperties = GetAllProperties(prop.PropertyType);
-            properties.AddRange(nestedProperties);
-            
+            if (prop.PropertyType.IsClass && prop.PropertyType != typeof(string))
+                properties.AddRange(GetAllProperties(prop.PropertyType));
         }
 
         return properties;
@@ -67,12 +65,10 @@ public class Utils
             var key = $"{Guid.NewGuid()}_{prop.Name}";
             propertyDict[key] = type;
 
-            if (prop.PropertyType.IsClass && prop.PropertyType != typeof(string))
+            if (!prop.PropertyType.IsClass || prop.PropertyType == typeof(string)) continue;
+            foreach (var nestedProperty in GetAllPropertiesWithParent(prop.PropertyType))
             {
-                foreach (var nestedProperty in GetAllPropertiesWithParent(prop.PropertyType))
-                {
-                    propertyDict[$"{Guid.NewGuid()}_{nestedProperty.Key}"] = prop.PropertyType;
-                }
+                propertyDict[$"{Guid.NewGuid()}_{nestedProperty.Key}"] = prop.PropertyType;
             }
         }
 
