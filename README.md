@@ -9,7 +9,7 @@ You can run my code by following the instructions:
   - You can ignore yellow line 
 ![image](https://github.com/user-attachments/assets/41ddaaa9-c167-4906-9c40-64e6f01fab5a)
 
-Noitce: you must dowload Dotnet 8.0 by link: https://dotnet.microsoft.com/en-us/download/dotnet/8.0
+Note: you must dowload Dotnet 8.0 by link: https://dotnet.microsoft.com/en-us/download/dotnet/8.0
 ![image](https://github.com/user-attachments/assets/757ff203-20a2-45bd-81bc-bf62ca9be051)
 
 Some example arguments:
