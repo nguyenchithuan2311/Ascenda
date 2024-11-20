@@ -4,6 +4,13 @@ namespace Test.Utils;
 
 public abstract class SortAndFilter
 {
+    /// <summary>
+    /// Filters a list of hotels by specified hotel IDs and destination IDs.
+    /// </summary>
+    /// <param name="hotelIds">The list of hotel IDs to filter by.</param>
+    /// <param name="destinationIds">The list of destination IDs to filter by.</param>
+    /// <param name="results">The list of hotels to be filtered.</param>
+    /// <returns>A filtered list of hotels that match the specified hotel IDs and destination IDs.</returns>
     public static List<OriginalHotel> FilterHotelsByHotelIdsAndDestinationIds(List<string> hotelIds,
         List<string> destinationIds, List<OriginalHotel> results)
     {
@@ -16,6 +23,12 @@ public abstract class SortAndFilter
         return results;
     }
 
+    /// <summary>
+    /// Sorts a list of hotels by specified hotel IDs and destination IDs.
+    /// </summary>
+    /// <param name="hotelIds">The list of hotel IDs to sort by.</param>
+    /// <param name="destinationIds">The list of destination IDs to sort by.</param>
+    /// <param name="results">The list of hotels to be sorted.</param>
     public static void SortHotelsByHotelIdsAndDestinationIds(List<string> hotelIds, List<string> destinationIds,
         List<OriginalHotel> results)
     {

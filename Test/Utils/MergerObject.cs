@@ -4,6 +4,13 @@ namespace Test.Utils;
 
 public abstract class MergerObject
 {
+    /// <summary>
+    /// Merges the properties of two objects of the same type.
+    /// </summary>
+    /// <typeparam name="T">The type of the objects to be merged.</typeparam>
+    /// <param name="objA">The first object to merge.</param>
+    /// <param name="objB">The second object to merge.</param>
+    /// <exception cref="ArgumentNullException">Thrown when either objA or objB is null.</exception>
     public static void MergeObjects<T>(T objA, T objB) where T : class, new()
     {
         if (objA == null || objB == null)
@@ -40,6 +47,12 @@ public abstract class MergerObject
         }
     }
 
+    /// <summary>
+    /// Merges the properties of two objects of the same type.
+    /// </summary>
+    /// <param name="objA">The first object to merge.</param>
+    /// <param name="objB">The second object to merge.</param>
+    /// <param name="type">The type of the objects to be merged.</param>
     private static void MergeObjects(object objA, object objB, Type type)
     {
         var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
@@ -78,6 +91,11 @@ public abstract class MergerObject
         }
     }
 
+    /// <summary>
+    /// Determines whether the specified value is the default value for its type.
+    /// </summary>
+    /// <param name="value">The value to check.</param>
+    /// <returns>True if the value is the default value for its type; otherwise, false.</returns>
     private static bool IsDefaultValue(object? value)
     {
         if (value == null)

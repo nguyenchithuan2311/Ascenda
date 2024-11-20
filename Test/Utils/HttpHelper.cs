@@ -6,6 +6,11 @@ public static class HttpHelper
 {
     private static readonly HttpClient Client = new();
 
+    /// <summary>
+    /// Fetches data from a list of URLs asynchronously.
+    /// </summary>
+    /// <param name="urls">The list of URLs to fetch data from.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a list of strings with the fetched data.</returns>
     private static async Task<List<string>> FetchDataFromUrlsAsync(IEnumerable<string> urls)
     {
         var results = await Task.WhenAll(urls.Select(async url =>
@@ -18,6 +23,10 @@ public static class HttpHelper
         return results.ToList();
     }
 
+    /// <summary>
+    /// Prepares data by fetching it from predefined URLs and deserializing the JSON responses.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a list of dictionaries with the deserialized data.</returns>
     public static async Task<List<Dictionary<string, object>>> PrepareDataAsync()
     {
         List<string> urls =
